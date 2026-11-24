@@ -1,1 +1,0 @@
-# Temurlify.uz
