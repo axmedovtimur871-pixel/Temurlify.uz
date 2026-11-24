@@ -19,7 +19,7 @@ export function AppShell({ profile, unread, children }: { profile: Profile; unre
   const [open, setOpen] = useState(false);
   const isStaff = profile.role !== "student";
 
-  const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
+  const navLinks = (onNavigate?: () => void) => (
     <nav className="space-y-0.5">
       {STUDENT_NAV.map((item) => {
         const active = isActive(path, item.href);
@@ -41,7 +41,7 @@ export function AppShell({ profile, unread, children }: { profile: Profile; unre
     </nav>
   );
 
-  const Footer = ({ onNavigate }: { onNavigate?: () => void }) => (
+  const footer = (onNavigate?: () => void) => (
     <div className="space-y-0.5 border-t border-line pt-3">
       {isStaff && (
         <Link href="/admin" onClick={onNavigate} className="flex h-10 items-center gap-3 rounded-[10px] px-3 text-[14px] text-ink-2 hover:bg-sunken/70 hover:text-ink">
@@ -64,8 +64,8 @@ export function AppShell({ profile, unread, children }: { profile: Profile; unre
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-screen flex-col gap-6 border-r border-line bg-surface-2/60 px-3 py-5 lg:flex">
         <Link href="/dashboard" className="px-2"><Logo /></Link>
-        <div className="flex-1 overflow-y-auto no-scrollbar"><NavLinks /></div>
-        <Footer />
+        <div className="flex-1 overflow-y-auto no-scrollbar">{navLinks()}</div>
+        {footer()}
       </aside>
 
       <div className="flex min-w-0 flex-col">
@@ -118,8 +118,8 @@ export function AppShell({ profile, unread, children }: { profile: Profile; unre
               <span className="font-medium">Menyu</span>
               <button onClick={() => setOpen(false)} className="grid size-9 place-items-center rounded-lg hover:bg-sunken" aria-label="Yopish"><X className="size-5" /></button>
             </div>
-            <NavLinks onNavigate={() => setOpen(false)} />
-            <div className="mt-3"><Footer onNavigate={() => setOpen(false)} /></div>
+            {navLinks(() => setOpen(false))}
+            <div className="mt-3">{footer(() => setOpen(false))}</div>
           </div>
         </div>
       )}

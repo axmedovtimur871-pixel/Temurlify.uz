@@ -128,7 +128,7 @@ export function Stat({
   return (
     <div className="card p-4 sm:p-5">
       <div className="flex items-center justify-between">
-        <span className="text-[13px] text-mute">{label}</span>
+        <span className="min-w-0 truncate pr-2 text-[13px] text-mute">{label}</span>
         {Icon && (
           <span className={cn("grid size-8 place-items-center rounded-lg", accents[accent])}>
             <Icon className="size-4" strokeWidth={2} />

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
-import { supabaseBrowser } from "@/lib/supabase/client";
+import { realtimeReady } from "@/lib/supabase/client";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
 
 type Toast = { id: string; title: string; body: string; link: string | null };
@@ -14,8 +15,11 @@ export function NotificationBell({ userId, initialUnread }: { userId: string; in
   const [toast, setToast] = useState<Toast | null>(null);
 
   useEffect(() => {
-    const supabase = supabaseBrowser();
-    const channel = supabase
+    let channel: RealtimeChannel | null = null;
+    let cancelled = false;
+    realtimeReady().then((supabase) => {
+    if (cancelled) return;
+    channel = supabase
       .channel(`notifications:${userId}`)
       .on(
         "postgres_changes",
@@ -36,7 +40,8 @@ export function NotificationBell({ userId, initialUnread }: { userId: string; in
         },
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    });
+    return () => { cancelled = true; if (channel) channel.unsubscribe(); };
   }, [userId]);
 
   return (

@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, Download, FileQuestion, Lock, VideoOff } from "l
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/auth";
 import { LinkButton } from "@/components/ui/button";
-import { Badge, EmptyState, LevelTag, SectionTitle } from "@/components/ui/misc";
+import { Badge, LevelTag, SectionTitle } from "@/components/ui/misc";
 import { embedUrl, renderMarkdown, withArticle } from "@/lib/utils";
 import { VideoPlayer, AddCardsButton } from "./client";
 import type { Lesson, Vocab } from "@/lib/types";

@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "db:seed": "node scripts/generate-seed.mjs"
+    "db:seed": "node scripts/generate-seed.mjs",
+    "test:db": "bash supabase/tests/run.sh",
+    "test:e2e": "node tests/e2e.mjs ./test-results"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.13.0",
@@ -29,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "supabase": "^3.4.0",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
   }

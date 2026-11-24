@@ -64,6 +64,7 @@ export function PasswordForm() {
 
 export function ThemePicker() {
   const [theme, setTheme] = useState<string>("system");
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- read browser-only preference after hydration
   useEffect(() => { try { setTheme(localStorage.getItem("theme") ?? "system"); } catch {} }, []);
   const apply = (t: string) => {
     setTheme(t);

@@ -113,7 +113,7 @@ export default function Home() {
             <div className="mt-2 font-display text-[1.6rem] leading-tight"><span className="text-lvl-a2">der</span> Bahnhof</div>
             <div className="mt-1 text-sm text-mute">vokzal · die Bahnhöfe</div>
           </div>
-          <div className="card absolute -right-3 -top-5 hidden rotate-[4deg] items-center gap-2.5 px-3.5 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
+          <div className="card absolute -bottom-6 -right-3 hidden rotate-[3deg] items-center gap-2.5 px-3.5 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
             <span className="grid size-8 place-items-center rounded-full bg-saffron-soft text-saffron"><Sparkles className="size-4" /></span>
             <div>
               <div className="text-sm font-medium">Yangi dars ochildi</div>

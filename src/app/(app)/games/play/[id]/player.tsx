@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { CheckCircle2, Hourglass, Loader2, Trophy, XCircle } from "lucide-react";
-import { supabaseBrowser } from "@/lib/supabase/client";
+import { realtimeReady } from "@/lib/supabase/client";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { answerGame, roundStats } from "../../actions";
 import { Leaderboard, SLOTS, TimerBar, useCountdown } from "@/components/game/parts";
 import { LinkButton } from "@/components/ui/button";
@@ -13,8 +14,11 @@ export function useGameRealtime(initialSession: GameSession, initialPlayers: Gam
   const [session, setSession] = useState(initialSession);
   const [players, setPlayers] = useState(initialPlayers);
   useEffect(() => {
-    const supabase = supabaseBrowser();
-    const ch = supabase
+    let ch: RealtimeChannel | null = null;
+    let cancelled = false;
+    realtimeReady().then((supabase) => {
+    if (cancelled) return;
+    ch = supabase
       .channel(`game:${initialSession.id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "game_sessions", filter: `id=eq.${initialSession.id}` },
         (p: { new: Record<string, unknown> }) => setSession(p.new as unknown as GameSession))
@@ -28,8 +32,15 @@ export function useGameRealtime(initialSession: GameSession, initialPlayers: Gam
             const copy = [...cur]; copy[i] = row; return copy;
           });
         })
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+      .subscribe((status: string) => {
+        // Catch up on anything that changed before the channel was live.
+        if (status === "SUBSCRIBED") {
+          supabase.from("game_sessions").select("*").eq("id", initialSession.id).single().then(({ data }: { data: unknown }) => data && setSession(data as unknown as GameSession));
+          supabase.from("game_players").select("*").eq("session_id", initialSession.id).then(({ data }: { data: unknown }) => data && setPlayers(data as unknown as GamePlayer[]));
+        }
+      });
+    });
+    return () => { cancelled = true; if (ch) ch.unsubscribe(); };
   }, [initialSession.id]);
   return { session, players };
 }
@@ -38,19 +49,22 @@ export function PlayerView({ initialSession, initialPlayers, userId }: { initial
   const { session, players } = useGameRealtime(initialSession, initialPlayers);
   const left = useCountdown(session.status === "live" ? session.question_started_at : null, session.seconds_per_question);
   const [picked, setPicked] = useState<{ index: number; choice: number } | null>(null);
-  const [mine, setMine] = useState<{ is_correct?: boolean; points?: number } | null>(null);
+  const [mineState, setMineState] = useState<{ i: number; v: { is_correct?: boolean; points?: number } | null } | null>(null);
+  const mine = mineState?.i === session.current_index ? mineState.v : null;
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const me = players.find((p) => p.user_id === userId);
   const rank = [...players].sort((a, b) => b.score - a.score).findIndex((p) => p.user_id === userId) + 1;
 
   useEffect(() => {
-    if (session.status === "reveal") roundStats(session.id).then((s) => setMine(s?.mine ?? null));
-    if (session.status === "live") { setMine(null); setError(null); }
+    if (session.status !== "reveal") return;
+    const i = session.current_index;
+    roundStats(session.id).then((s) => setMineState({ i, v: s?.mine ?? null }));
   }, [session.status, session.current_index, session.id]);
 
   const choose = async (choice: number) => {
     if (picked?.index === session.current_index || left <= 0) return;
+    setError(null);
     setPicked({ index: session.current_index, choice });
     setSending(true);
     const res = await answerGame(session.id, choice);

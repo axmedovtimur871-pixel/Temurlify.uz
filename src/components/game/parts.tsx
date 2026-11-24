@@ -14,15 +14,14 @@ export const SLOTS = [
 ];
 
 export function useCountdown(startedAt: string | null, seconds: number) {
-  const [left, setLeft] = useState(seconds);
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    if (!startedAt) { setLeft(seconds); return; }
-    const tick = () => setLeft(Math.max(0, seconds - (Date.now() - new Date(startedAt).getTime()) / 1000));
-    tick();
-    const id = window.setInterval(tick, 200);
+    if (!startedAt) return;
+    const id = window.setInterval(() => setNow(Date.now()), 200);
     return () => clearInterval(id);
-  }, [startedAt, seconds]);
-  return left;
+  }, [startedAt]);
+  if (!startedAt) return seconds;
+  return Math.max(0, Math.min(seconds, seconds - (now - new Date(startedAt).getTime()) / 1000));
 }
 
 export function TimerBar({ left, total }: { left: number; total: number }) {
