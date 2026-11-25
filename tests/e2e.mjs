@@ -6,7 +6,7 @@ import { createRequire } from "node:module";
 const { chromium } = createRequire(import.meta.url)("playwright");
 import { mkdirSync } from "node:fs";
 
-const BASE = "http://localhost:3000";
+const BASE = process.env.BASE ?? "http://localhost:3000";
 const OUT = process.argv[2];
 mkdirSync(OUT, { recursive: true });
 const SR = process.env.SR;

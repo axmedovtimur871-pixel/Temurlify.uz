@@ -7,7 +7,9 @@ const isPublic = (path: string) =>
 
 // Refreshes the Supabase session cookie on every request and keeps
 // signed-out visitors away from the app. Role checks happen in layouts.
-export async function proxy(request: NextRequest) {
+// Kept as Edge `middleware` (not Node `proxy`) because the Cloudflare adapter
+// (OpenNext) only fully supports Edge middleware.
+export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const path = request.nextUrl.pathname;

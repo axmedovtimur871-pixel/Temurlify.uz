@@ -2,7 +2,7 @@
 
 **Raqamli nemis tili sinfxonasi** — A1 dan C1 gacha 120 dars, test bilan avtomatik ochiladigan darslar, to'rt ko'nikma bo'yicha uy vazifalari, nemischa-o'zbekcha lug'at va AI tarjimon, kartochkalar, jonli o'yinlar va to'liq admin panel.
 
-A German learning platform for Uzbek speakers. Next.js 16 · TypeScript · Tailwind CSS 4 · Supabase (Auth, Postgres, Storage, Realtime) · Vercel.
+A German learning platform for Uzbek speakers. Next.js 16 · TypeScript · Tailwind CSS 4 · Supabase (Auth, Postgres, Storage, Realtime) · Cloudflare Workers (or Vercel).
 
 ## Features
 
@@ -33,11 +33,25 @@ A German learning platform for Uzbek speakers. Next.js 16 · TypeScript · Tailw
 3. **Auth → URL configuration**: set Site URL to your domain and add `https://YOUR-DOMAIN/auth/callback` to redirect URLs.
 4. Optional: turn off "Confirm email" if students should be able to sign in right after registering.
 
-### 2. Vercel
-1. Import this GitHub repository in Vercel (framework: Next.js, no extra settings).
-2. Add the environment variables from `.env.example` (Production + Preview).
-3. Deploy. Every push to a branch creates a preview deployment; `main` deploys to production.
-4. Add the domain `temurlify.uz` under Project → Domains.
+### 2. Cloudflare Workers (recommended)
+The app runs on Cloudflare Workers through the [OpenNext adapter](https://opennext.js.org/cloudflare) (`open-next.config.ts`, `wrangler.jsonc`). Cloudflare builds and deploys straight from GitHub, so no API token has to leave your account.
+
+1. Cloudflare dashboard → **Workers & Pages → Create → Import a repository** → choose `Temurlify.uz`.
+2. Settings:
+   - Project name: `temurlify` (must match `name` in `wrangler.jsonc`)
+   - Build command: `npx opennextjs-cloudflare build`
+   - Deploy command: `npx opennextjs-cloudflare deploy`
+   - Production branch: `main` (other branches get preview URLs)
+3. **Build variables** (inlined at build time): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`.
+4. **Settings → Variables and Secrets** (runtime, type *Secret*): `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `ADMIN_EMAILS`.
+5. **Settings → Domains & Routes** → add `temurlify.uz`.
+
+Before Supabase is configured the site still deploys and shows a setup page.
+
+Deploying from your own computer instead: `npx wrangler login`, then `npm run cf:deploy` with the build variables in `.env.local` and secrets set via `npx wrangler secret put NAME`. Test the Worker locally with `npm run cf:preview`.
+
+### 2b. Vercel (alternative)
+Import the repository in Vercel, add the variables from `.env.example`, deploy. No extra configuration is needed.
 
 ### 3. First admin
 Put your email in `ADMIN_EMAILS`, register on the site, and you are promoted to admin on first visit. Admins can then promote teachers from **Admin → Talabalar**.
